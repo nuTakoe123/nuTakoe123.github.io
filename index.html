@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Владислав Бзычкин</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Golos+Text:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* layout: одна левая колонка 64rem, герой с живой схемой пула воркеров, дальше спокойные секции-строки */
+  --bg: #EDF1F0;
+  --surface: #F8FAF9;
+  --ink: #14222A;
+  --muted: #56666D;
+  --line: #CBD5D3;
+  --accent: #0A7EA4;
+  --spark: #D9862B;
+  --font-display: "Unbounded", "Golos Text", system-ui, sans-serif;
+  --font-body: "Golos Text", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0E171B;
+    --surface: #142128;
+    --ink: #E2EAEC;
+    --muted: #8FA0A6;
+    --line: #26363D;
+    --accent: #3DB6DB;
+    --spark: #E9A24F;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0E171B;
+  --surface: #142128;
+  --ink: #E2EAEC;
+  --muted: #8FA0A6;
+  --line: #26363D;
+  --accent: #3DB6DB;
+  --spark: #E9A24F;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+.wrap { max-width: 64rem; margin: 0 auto; padding: 0 clamp(16px, 4vw, 40px); }
+
+header.hero { padding: clamp(40px, 8vw, 88px) 0 32px; display: grid; gap: 28px; }
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.4rem, 7.5vw, 5.4rem);
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+  margin: 0;
+  text-wrap: balance;
+}
+.hero .role {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+  margin: 0;
+  color: var(--accent);
+}
+.hero .lead { max-width: 38rem; margin: 0; color: var(--ink); }
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1.5px solid var(--ink);
+  color: var(--ink);
+}
+.btn.primary { background: var(--ink); color: var(--bg); }
+.btn:hover { border-color: var(--accent); }
+.btn.primary:hover { background: var(--accent); border-color: var(--accent); }
+
+.pool {
+  margin-top: 8px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 18px 18px 14px;
+  display: grid;
+  gap: 12px;
+}
+.pool canvas { width: 100%; height: 230px; display: block; }
+.pool-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 20px; }
+.pool-bar p { margin: 0; color: var(--muted); font-size: 0.95rem; max-width: 36rem; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg span { font-size: 0.85rem; color: var(--muted); padding: 0 8px 0 10px; align-self: center; }
+.seg button {
+  font: 600 0.85rem var(--font-code);
+  border: 0; background: transparent; color: var(--ink);
+  padding: 6px 12px; border-radius: 999px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--bg); }
+
+section { padding: 56px 0 8px; }
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.35rem, 3vw, 1.75rem);
+  letter-spacing: -0.01em;
+  margin: 0 0 24px;
+}
+
+.projects { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.project {
+  display: grid;
+  grid-template-columns: minmax(10rem, 15rem) 1fr;
+  gap: 8px 32px;
+  padding: 26px 0;
+  border-bottom: 1px solid var(--line);
+}
+.project h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.15rem;
+  margin: 0;
+  line-height: 1.3;
+}
+.project h3 small { display: block; font-family: var(--font-body); font-weight: 500; font-size: 0.85rem; color: var(--muted); margin-top: 6px; }
+.project .body { display: grid; gap: 12px; max-width: 40rem; }
+.project p { margin: 0; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; padding: 0; margin: 0; list-style: none; }
+.tags li {
+  font-family: var(--font-code);
+  font-size: 0.78rem;
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--ink);
+}
+.metric { display: flex; align-items: baseline; gap: 10px; }
+.metric b { font-family: var(--font-display); font-size: 1.6rem; font-weight: 600; color: var(--spark); font-variant-numeric: tabular-nums; }
+.metric span { color: var(--muted); font-size: 0.95rem; }
+pre {
+  margin: 0;
+  overflow-x: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font: 0.82rem/1.65 var(--font-code);
+  color: var(--ink);
+}
+pre .k { color: var(--accent); }
+pre .s { color: var(--spark); }
+
+.timeline { display: grid; gap: 0; border-top: 1px solid var(--line); }
+.row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 15rem) 1fr;
+  gap: 4px 32px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+}
+.row time, .row .when { color: var(--muted); font-size: 0.95rem; font-variant-numeric: tabular-nums; }
+.row h3 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+.row p { margin: 4px 0 0; color: var(--muted); max-width: 40rem; }
+.now { color: var(--accent); font-weight: 600; }
+
+.stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 28px; }
+.stack h3 { margin: 0 0 10px; font-size: 1rem; font-weight: 600; }
+
+footer { padding: 64px 0 56px; }
+.contact {
+  display: grid;
+  gap: 18px;
+  padding-top: 28px;
+  border-top: 2px solid var(--ink);
+}
+.contact p { margin: 0; max-width: 34rem; }
+.fine { color: var(--muted); font-size: 0.85rem; margin-top: 32px; }
+
+@media (max-width: 640px) {
+  .project, .row { grid-template-columns: 1fr; }
+  .pool canvas { height: 260px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div style="display:grid; gap:14px">
+      <h1>Владислав Бзычкин</h1>
+      <p class="role">Бэкенд-разработчик на Go</p>
+    </div>
+    <p class="lead">Учусь в Школе 21 и в Яндекс Лицее на курсе «Go Web-разработчик». До Go полтора года писал на Python ботов и автоматизацию для компании посуточной аренды в Петербурге. Ищу стажировку или первую работу.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://t.me/vladislav_desi">Написать в Telegram</a>
+      <a class="btn" href="https://hh.ru/resume/b458ba47ff116404430039ed1f64677339444a">Резюме на hh.ru</a>
+    </div>
+
+    <figure class="pool" aria-labelledby="pool-cap">
+      <canvas id="pool" role="img" aria-label="Схема: задачи из канала jobs расходятся по воркерам и выходят в канал results в исходном порядке"></canvas>
+      <div class="pool-bar">
+        <p id="pool-cap">Пул воркеров на горутинах: задачи приходят из канала, обрабатываются параллельно и выходят в исходном порядке.</p>
+        <div class="seg" role="group" aria-label="Число воркеров">
+          <span>воркеров</span>
+          <button type="button" id="w1" data-n="1" aria-pressed="false">1</button>
+          <button type="button" id="w2" data-n="2" aria-pressed="false">2</button>
+          <button type="button" id="w4" data-n="4" aria-pressed="true">4</button>
+          <button type="button" id="w6" data-n="6" aria-pressed="false">6</button>
+        </div>
+      </div>
+    </figure>
+  </header>
+
+  <section id="projects">
+    <h2>Проекты</h2>
+    <div class="projects">
+      <article class="project">
+        <h3>Сервис заказов такси<small>Go, микросервис</small></h3>
+        <div class="body">
+          <p>Микросервис заказов для такси. Принимает запросы по gRPC и по REST через grpc-gateway, хранит заказы в PostgreSQL, кеширует в Redis и отправляет события о смене статуса заказа в Kafka.</p>
+          <ul class="tags"><li>Go</li><li>gRPC</li><li>grpc-gateway</li><li>Protobuf</li><li>PostgreSQL</li><li>Redis</li><li>Kafka</li></ul>
+        </div>
+      </article>
+
+      <article class="project">
+        <h3>Рацион<small>проектный этап, Яндекс Лицей</small></h3>
+        <div class="body">
+          <p>Приложение собирает рацион питания и считает, сколько он будет стоить в зависимости от выбранного магазина.</p>
+          <ul class="tags"><li>Go</li><li>REST API</li><li>SQL</li></ul>
+        </div>
+      </article>
+
+      <article class="project">
+        <h3>REST API на net/http<small>Go, без фреймворков</small></h3>
+        <div class="body">
+          <p>CRUD-сервис на стандартной библиотеке: роутинг Go 1.22 с методами и параметрами в пути, middleware, ответы в JSON. Писал без фреймворков, чтобы разобраться, как всё устроено внутри.</p>
+<pre><code>mux := http.NewServeMux()
+mux.HandleFunc(<span class="s">"GET /{id}"</span>, h.Get)
+mux.HandleFunc(<span class="s">"PATCH /{id}"</span>, h.Update)
+mux.HandleFunc(<span class="s">"DELETE /{id}"</span>, h.Delete)
+
+id := r.PathValue(<span class="s">"id"</span>)</code></pre>
+          <ul class="tags"><li>Go</li><li>net/http</li><li>middleware</li><li>JSON</li></ul>
+        </div>
+      </article>
+
+      <article class="project">
+        <h3>Отзывы на Островке<small>Python, для посуточной аренды</small></h3>
+        <div class="body">
+          <p>Боты, которые находят отзывы о компании на площадках и помогают отвечать на них. Плюс сбор цен конкурентов и автоматизация отчётов с веб-админкой.</p>
+          <div class="metric"><b>30 → 5 мин</b><span>столько стала занимать обработка отзывов</span></div>
+          <ul class="tags"><li>Python</li><li>aiogram 3</li><li>PostgreSQL</li><li>SQLAlchemy</li><li>Selenium</li><li>Django</li></ul>
+        </div>
+      </article>
+
+      <article class="project">
+        <h3>Коды от дверей<small>Битрикс24</small></h3>
+        <div class="body">
+          <p>За день до заезда гость автоматически получает код от двери в Telegram, WhatsApp или MAX. Код собирается из последних четырёх цифр его номера.</p>
+          <ul class="tags"><li>Битрикс24</li><li>Telegram Bot API</li></ul>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section id="experience">
+    <h2>Опыт</h2>
+    <div class="timeline">
+      <div class="row">
+        <div class="when">июнь 2025 — <span class="now">сейчас</span></div>
+        <div>
+          <h3>Python-разработчик, Цветной Петербург</h3>
+          <p>Telegram-боты и автоматизация для компании посуточной аренды квартир: отзывы, цены конкурентов, отчёты, интеграция с веб-админкой.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="when">июнь 2025 — <span class="now">сейчас</span></div>
+        <div>
+          <h3>Python-разработчик, UpWork</h3>
+          <p>Разовые проекты для заказчиков.</p>
+        </div>
+      </div>
+      <div class="row">
+        <div class="when">июнь — август 2025</div>
+        <div>
+          <h3>Оператор поддержки, Колор СПБ</h3>
+          <p>Отвечал клиентам в чате и по телефону, вёл данные в CRM.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <h2>Учёба</h2>
+    <div class="timeline">
+      <div class="row">
+        <div class="when"><span class="now">сейчас</span></div>
+        <div><h3>Школа 21</h3><p>Бэкенд-разработка на Go</p></div>
+      </div>
+      <div class="row">
+        <div class="when"><span class="now">сейчас</span></div>
+        <div><h3>Яндекс Лицей</h3><p>Go Web-разработчик</p></div>
+      </div>
+      <div class="row">
+        <div class="when">до 2028</div>
+        <div><h3>Колледж «Синергия»</h3><p>09.02.07, информационные системы и программирование</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="stack">
+    <h2>Стек</h2>
+    <div class="stack">
+      <div>
+        <h3>Go</h3>
+        <ul class="tags"><li>net/http</li><li>gRPC</li><li>grpc-gateway</li><li>Protobuf</li><li>горутины и каналы</li><li>context</li><li>sync</li></ul>
+      </div>
+      <div>
+        <h3>Данные</h3>
+        <ul class="tags"><li>PostgreSQL</li><li>Redis</li><li>Kafka</li><li>SQL</li><li>проектирование БД</li></ul>
+      </div>
+      <div>
+        <h3>Python</h3>
+        <ul class="tags"><li>aiogram 3</li><li>SQLAlchemy</li><li>asyncpg</li><li>Selenium</li><li>Django</li></ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="contact">
+      <h2 style="margin:0">Связаться</h2>
+      <p>Быстрее всего ответ придёт в Telegram: <a href="https://t.me/vladislav_desi">@vladislav_desi</a>. Резюме с опытом и навыками есть на <a href="https://hh.ru/resume/b458ba47ff116404430039ed1f64677339444a">hh.ru</a>.</p>
+    </div>
+    <p class="fine">Москва. Готов к удалёнке, гибриду и офису.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('pool');
+  const ctx = canvas.getContext('2d');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W = 0, H = 0, dpr = 1;
+
+  function colors() {
+    const s = getComputedStyle(document.documentElement);
+    const g = n => s.getPropertyValue(n).trim();
+    return { ink: g('--ink'), muted: g('--muted'), line: g('--line'), accent: g('--accent'), spark: g('--spark'), surface: g('--surface'), mono: g('--font-code') };
+  }
+
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const r = canvas.getBoundingClientRect();
+    W = r.width; H = r.height;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+
+  let workersN = 4;
+  let nextId = 1, nextOut = 1;
+  let tasks = [];
+  let workers = [];
+  let out = [];
+  let lastSpawn = 0;
+
+  function geom() {
+    const top = 34, bottom = H - 18;
+    const qx = Math.max(56, W * 0.12);
+    const wx = W * 0.47;
+    const ox = W * 0.84;
+    const lanes = workers.map((_, i) => top + (bottom - top) * (i + 0.5) / workers.length);
+    return { top, bottom, qx, wx, ox, lanes, mid: (top + bottom) / 2 };
+  }
+
+  function setWorkers(n) {
+    workersN = n;
+    workers = Array.from({ length: n }, () => ({ task: null }));
+    tasks.forEach(t => { if (t.state === 'work' || t.state === 'toWorker') { t.state = 'queue'; t.worker = -1; } });
+    document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.n === n)));
+  }
+
+  function spawn(now) {
+    tasks.push({ id: nextId++, state: 'queue', x: -10, y: 0, worker: -1, t0: now, dur: 700 + Math.random() * 1700, done: 0 });
+  }
+
+  function lerp(a, b, k) { return a + (b - a) * k; }
+
+  function step(now, dt) {
+    const g = geom();
+    if (now - lastSpawn > 330 && tasks.filter(t => t.state === 'queue').length < Math.max(2, Math.floor((W * 0.12) / 23))) { spawn(now); lastSpawn = now; }
+
+    const queue = tasks.filter(t => t.state === 'queue').sort((a, b) => a.id - b.id);
+    workers.forEach((w, i) => {
+      if (!w.task && queue.length) {
+        const t = queue.shift();
+        t.state = 'toWorker'; t.worker = i; w.task = t;
+      }
+    });
+
+    queue.forEach((t, i) => {
+      const tx = g.qx - i * 23, ty = g.mid;
+      t.x = lerp(t.x, tx, Math.min(1, dt * 0.012));
+      t.y = lerp(t.y || ty, ty, Math.min(1, dt * 0.012));
+    });
+
+    tasks.forEach(t => {
+      if (t.state === 'toWorker') {
+        const ty = g.lanes[t.worker];
+        t.x = lerp(t.x, g.wx, Math.min(1, dt * 0.01));
+        t.y = lerp(t.y, ty, Math.min(1, dt * 0.01));
+        if (Math.abs(t.x - g.wx) < 2 && Math.abs(t.y - ty) < 2) { t.state = 'work'; t.t0 = now; }
+      } else if (t.state === 'work') {
+        t.done = Math.min(1, (now - t.t0) / t.dur);
+        if (t.done >= 1) { t.state = 'buffer'; workers[t.worker].task = null; }
+      } else if (t.state === 'buffer') {
+        const waiting = tasks.filter(x => x.state === 'buffer').sort((a, b) => a.id - b.id);
+        const idx = waiting.indexOf(t);
+        const bx = W * 0.66, by = g.top + 8 + idx * 18;
+        t.x = lerp(t.x, bx, Math.min(1, dt * 0.01));
+        t.y = lerp(t.y, Math.min(by, g.bottom), Math.min(1, dt * 0.01));
+        if (t.id === nextOut) { t.state = 'out'; nextOut++; }
+      } else if (t.state === 'out') {
+        t.x = lerp(t.x, g.ox, Math.min(1, dt * 0.012));
+        t.y = lerp(t.y, g.mid, Math.min(1, dt * 0.012));
+        if (Math.abs(t.x - g.ox) < 3) { t.state = 'gone'; out.unshift(t.id); out = out.slice(0, 5); }
+      }
+    });
+    tasks = tasks.filter(t => t.state !== 'gone');
+  }
+
+  function draw() {
+    const c = colors();
+    const g = geom();
+    ctx.clearRect(0, 0, W, H);
+    ctx.font = `600 11px ${c.mono}`;
+    ctx.textBaseline = 'middle';
+
+    ctx.fillStyle = c.muted;
+    ctx.textAlign = 'left';
+    ctx.fillText('jobs <-chan', 4, 12);
+    ctx.textAlign = 'center';
+    ctx.fillText(`go worker() × ${workers.length}`, g.wx, 12);
+    ctx.fillText('reorder', W * 0.66, 12);
+    ctx.textAlign = 'right';
+    ctx.fillText('results', W - 4, 12);
+
+    ctx.strokeStyle = c.line;
+    ctx.lineWidth = 1;
+    g.lanes.forEach(y => {
+      ctx.beginPath();
+      ctx.moveTo(g.qx + 14, g.mid);
+      ctx.bezierCurveTo(g.qx + 80, g.mid, g.wx - 90, y, g.wx - 16, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(g.wx, y, 15, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+    ctx.beginPath();
+    ctx.moveTo(W * 0.66 + 14, g.mid);
+    ctx.lineTo(g.ox - 14, g.mid);
+    ctx.stroke();
+
+    tasks.forEach(t => {
+      const working = t.state === 'work';
+      if (working) {
+        ctx.strokeStyle = c.spark;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 15, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * t.done);
+        ctx.stroke();
+      }
+      const r = 10;
+      ctx.fillStyle = t.state === 'out' ? c.accent : (t.state === 'buffer' ? c.spark : (working ? c.surface : c.ink));
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, r, 0, Math.PI * 2);
+      ctx.fill();
+      if (working) { ctx.strokeStyle = c.ink; ctx.lineWidth = 1.5; ctx.stroke(); }
+      ctx.fillStyle = working ? c.ink : c.surface;
+      ctx.textAlign = 'center';
+      ctx.font = `600 10px ${c.mono}`;
+      ctx.fillText(String(t.id), t.x, t.y + 0.5);
+    });
+
+    ctx.textAlign = 'right';
+    ctx.font = `600 12px ${c.mono}`;
+    out.forEach((id, i) => {
+      ctx.fillStyle = i === 0 ? c.accent : c.muted;
+      ctx.globalAlpha = 1 - i * 0.17;
+      ctx.fillText(String(id), W - 4, g.mid + 26 + i * 18);
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  function warm() {
+    let t = 0;
+    for (let i = 0; i < 260; i++) { t += 16; step(t, 16); }
+    return t;
+  }
+
+  resize();
+  setWorkers(4);
+  let clock = warm();
+  draw();
+
+  document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => {
+    setWorkers(+b.dataset.n);
+    if (reduce) { clock = warm(); draw(); }
+  }));
+
+  new ResizeObserver(() => { resize(); draw(); }).observe(canvas);
+  new MutationObserver(draw).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+
+  if (!reduce) {
+    let prev = performance.now();
+    function frame(now) {
+      const dt = Math.min(48, now - prev); prev = now;
+      clock += dt;
+      step(clock, dt);
+      draw();
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+})();
+</script>
+</body>
+</html>
